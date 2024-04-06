@@ -33,3 +33,5 @@
 
 # Visual studio weirdness
 .vs
+x64
+x86
