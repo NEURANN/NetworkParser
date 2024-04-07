@@ -36,7 +36,7 @@ struct SubnetworkChromosomeParseResult {
 	SubnetworkGene* Genes = nullptr;
 	uint32_t GeneCount = 0;
 	unsigned int ReturnCode = CHROMOSOME_SUCCESS;
-	unsigned int AdditionalInfo = 0;
+	signed   int AdditionalInfo = 0;
 };
 
 DLL_EXPORT SubnetworkChromosomeParseResult ParseSubnetworkChromosome(const char* Filepath);

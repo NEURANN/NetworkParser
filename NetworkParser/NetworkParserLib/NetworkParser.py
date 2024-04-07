@@ -1,6 +1,8 @@
 import ctypes
 from enum import Enum
 
+import logging
+logger = logging.getLogger("NetworkParser")
 
 SOURCE_TYPE_INPUT =   0b00000001
 SOURCE_TYPE_HIDDEN =  0b00000010
@@ -9,8 +11,9 @@ TARGET_TYPE_OUTPUT =  0b00001000
 
 
 #load the dll on import
+logger.info("Loading library file")
 __network_parser_dll = ctypes.cdll.LoadLibrary("./NetworkParser.dll")
-
+logger.info("Library file loaded.")
 
 class C_InternalConnectionCodon(ctypes.Structure):
     _fields_ = [
@@ -93,7 +96,7 @@ class C_SubnetworkChromosomeParseResult(ctypes.Structure):
         ("Genes", ctypes.POINTER(C_SubnetworkGene)),
         ("GeneCount", ctypes.c_uint32),
         ("ReturnCode", ctypes.c_uint),
-        ("AdditionalInfo", ctypes.c_uint)
+        ("AdditionalInfo", ctypes.c_int)
     ]
 
 class SubnetworkChromosomeParseResult:
@@ -104,7 +107,7 @@ class SubnetworkChromosomeParseResult:
         CHROMOSOME_MISSING_GENES =  3
         CHROMOSOME_BAD_GENE =       4
 
-    def __init__(self, c_result):
+    def __init__(self, c_result, path="No path provided"):
         self.genes = []
         self.gene_count = int(c_result.GeneCount)
         self.return_code = int(c_result.ReturnCode)
@@ -115,10 +118,12 @@ class SubnetworkChromosomeParseResult:
             #we take it as a slice to prevent going out of bounds
             for c_gene in c_result.Genes[:self.gene_count]:
                 self.genes.append(SubnetworkGene(c_gene))
+
+            logger.debug(f"Finished parsing \"{path}\": {self.gene_count} genes found, additional info = {self.additional_info}")
                 
         else:
             ret_str = str(SubnetworkChromosomeParseResult.Retcodes(c_result.ReturnCode))
-            print(f"Error: {ret_str}")
+            logger.error(f"Error parsing \"{path}\": {ret_str}. {self.gene_count} genes found, additional info: {self.additional_info}")
          
     def __str__(self):
         return f"""SubnetworkChromosomeParseResult: 
@@ -129,6 +134,7 @@ class SubnetworkChromosomeParseResult:
 
 
 #now that the types have been defined, set up our library functions
+logger.info("Preparing library functions")
 __parse_subnetwork_chromosome = __network_parser_dll.ParseSubnetworkChromosome
 __parse_subnetwork_chromosome.restype = C_SubnetworkChromosomeParseResult
 __parse_subnetwork_chromosome.argtypes = [
@@ -139,16 +145,24 @@ __free_parse_result = __network_parser_dll.FreeParseResult
 __free_parse_result.argtypes = [
     C_SubnetworkChromosomeParseResult
 ]
+logger.info("Prepared library functions")
 
 def parse_subnetwork_chromosome(path):
+    logger.debug(f"Attempting to parse\"{path}\"")
     c_result = __parse_subnetwork_chromosome(bytes(path, "ASCII"))
-    result = SubnetworkChromosomeParseResult(c_result)
+    result = SubnetworkChromosomeParseResult(c_result, path=path)
+
+    logger.debug(f"Freeing C_SubnetworkChromosomeParseResult for \"{path}\"")
     __free_parse_result(c_result)
+    logger.debug(f"Freed C_SubnetworkChromosomeParseResult for \"{path}\"")
     return result
 
 
 
 if __name__ == "__main__":
+    FORMAT = '%(asctime)s %(message)s'
+    logging.basicConfig(filename="test_log.log", level=logging.DEBUG, format=FORMAT)
+
     test_resource_dir = "Tests/"
     test_files = ["Doesn't exist.chr", "Short.chr", "Missing genes.chr", "Bad genes.chr", "Success.chr"]
     for file in test_files:

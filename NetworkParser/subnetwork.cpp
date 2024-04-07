@@ -26,6 +26,7 @@ SubnetworkChromosomeParseResult ParseSubnetworkChromosome(const char* Filepath) 
 	if (!chromosomeFile) {
 		chromosomeFile.close();
 		result.ReturnCode = CHROMOSOME_BAD_PATH;
+		result.AdditionalInfo = -1;
 		return result;
 	}
 
@@ -35,6 +36,7 @@ SubnetworkChromosomeParseResult ParseSubnetworkChromosome(const char* Filepath) 
 	if (chromosomeFile.gcount() != 4) {
 		chromosomeFile.close();
 		result.ReturnCode = CHROMOSOME_FILE_SHORT;
+		result.AdditionalInfo = -1;
 		return result;
 	}
 
@@ -67,6 +69,7 @@ SubnetworkChromosomeParseResult ParseSubnetworkChromosome(const char* Filepath) 
 
 	//successful chromosome parse
 	result.ReturnCode = CHROMOSOME_SUCCESS;
+	result.AdditionalInfo = -1;
 	return result;
 }
 
