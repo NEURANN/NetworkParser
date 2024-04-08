@@ -36,6 +36,7 @@ ConnectionsChromosomeParseResult ParseConnectionsChromosome(const char* Filepath
 	}
 
 
+	chromosomeFile.close();
 	result.ReturnCode = CONNECTIONS_CHROMOSOME_SUCCESS;
 	return result;
 }

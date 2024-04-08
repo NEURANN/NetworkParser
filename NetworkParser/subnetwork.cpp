@@ -1,20 +1,6 @@
 #include "pch.h"
 #include "subnetwork.hpp"
 
-//TEMPORARY FOR DEBUGGING. Not required for file.
-//#include <iostream>
-
-//helper function to destroy a gene array and the genes' codon arrays
-auto CleanupGenes = [](SubnetworkGene* Genes, uint32_t Count) {
-	if (Genes == nullptr) {
-		return;
-	}
-
-	for (uint32_t i = 0; i < Count; i++) {
-		delete Genes[i].Codons;
-	}
-	delete Genes;
-};
 
 SubnetworkChromosomeParseResult ParseSubnetworkChromosome(const char* Filepath) {
 	SubnetworkChromosomeParseResult result = { };
@@ -52,7 +38,6 @@ SubnetworkChromosomeParseResult ParseSubnetworkChromosome(const char* Filepath) 
 
 		case SUBNETWORK_GENE_EOF:
 			chromosomeFile.close();
-			CleanupGenes(result.Genes, result.GeneCount);
 			result.ReturnCode = SUBNETWORK_CHROMOSOME_MISSING_GENES;
 			result.AdditionalInfo = i;
 			return result;
@@ -60,7 +45,6 @@ SubnetworkChromosomeParseResult ParseSubnetworkChromosome(const char* Filepath) 
 		case SUBNETWORK_GENE_SHORT:
 		case SUBNETWORK_GENE_MISSING_CONNECTIONS:
 			chromosomeFile.close();
-			CleanupGenes(result.Genes, result.GeneCount);
 			result.ReturnCode = SUBNETWORK_CHROMOSOME_BAD_GENE;
 			result.AdditionalInfo = i;
 			return result;
@@ -68,13 +52,21 @@ SubnetworkChromosomeParseResult ParseSubnetworkChromosome(const char* Filepath) 
 	}
 
 	//successful chromosome parse
+	chromosomeFile.close();
 	result.ReturnCode = SUBNETWORK_CHROMOSOME_SUCCESS;
 	result.AdditionalInfo = -1;
 	return result;
 }
 
 void FreeSubnetworkParseResult(SubnetworkChromosomeParseResult Result) {
-	//CleanupGenes(Result.Genes, Result.GeneCount);
+	if (Result.Genes == nullptr) {
+		return;
+	}
+
+	for (uint32_t i = 0; i < Result.GeneCount; i++) {
+		delete Result.Genes[i].Codons;
+	}
+	delete Result.Genes;
 }
 
 

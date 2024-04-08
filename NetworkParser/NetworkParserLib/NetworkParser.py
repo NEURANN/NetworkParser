@@ -402,3 +402,28 @@ if __name__ == "__main__":
         print(file)
         print(str(ConnectionsChromosomeParseResult.from_file(test_resource_dir + file)))
         print()
+
+
+    print("Repeating operations to check for memory")
+    print("Keep an eye on memory usage! This isn't a quantitative test!")
+    logger.disabled = True
+    PRINT_INTERVAL = 10000
+    TESTS = 5000000
+    for i in range(TESTS):
+        if i % PRINT_INTERVAL == 0:
+            print(i)
+
+        test_resource_dir = "Tests/subnetworks/"
+        test_files = ["Bad path.chr", "Short.chr", "Missing genes.chr", "Bad genes.chr", "Success.chr"]
+        for file in test_files:
+            SubnetworkChromosomeParseResult.from_file(test_resource_dir + file)
+
+        test_resource_dir = "Tests/quadrants/"
+        test_files = ["Bad path.chr", "Short.chr", "Missing quadrants.chr", "Success.chr"]
+        for file in test_files:
+            QuadrantChromosomeParseResult.from_file(test_resource_dir + file)
+
+        test_resource_dir = "Tests/connections/"
+        test_files = ["Bad path.chr", "Short.chr", "Quadrant short.chr", "Success.chr"]
+        for file in test_files:
+            ConnectionsChromosomeParseResult.from_file(test_resource_dir + file)

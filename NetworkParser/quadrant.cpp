@@ -48,6 +48,8 @@ QuadrantChromosomeParseResult ParseQuadrantChromosome(const char* Filepath) {
 		result.SubnetworkIndices[i] = subnetworkIndices + (i * result.SubnetworksPerQuadrant);
 	}
 
+	chromosomeFile.close();
+	result.ReturnCode = QUADRANT_CHROMOSOME_SUCCESS;
 	return result;
 }
 
