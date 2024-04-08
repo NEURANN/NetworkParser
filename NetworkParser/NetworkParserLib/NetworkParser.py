@@ -133,18 +133,35 @@ class SubnetworkChromosomeParseResult:
 \tAdditional info = {self.additional_info}
 \tGene count = {self.gene_count} ({len(self.genes) = })
 \tFirst gene slice = {self.genes[:1]}"""
+    
+
+    @staticmethod
+    def from_file(path):
+        global _parse_subnetwork_chromosome
+        global _free_subnetwork_parse_result
+
+
+        logger.debug(f"Attempting to parse subnetwork chromosome \"{path}\"")
+        c_result = _parse_subnetwork_chromosome(bytes(path, "ASCII"))
+        result = SubnetworkChromosomeParseResult(c_result, path=path)
+
+        logger.debug(f"Freeing C_SubnetworkChromosomeParseResult for \"{path}\"")
+        _free_subnetwork_parse_result(c_result)
+        logger.debug(f"Freed C_SubnetworkChromosomeParseResult for \"{path}\"")
+
+        return result
 
 
 #now that the types have been defined, set up our library functions
 logger.info("Preparing subnetwork chromosome library functions")
-__parse_subnetwork_chromosome = __network_parser_dll.ParseSubnetworkChromosome
-__parse_subnetwork_chromosome.restype = C_SubnetworkChromosomeParseResult
-__parse_subnetwork_chromosome.argtypes = [
+_parse_subnetwork_chromosome = __network_parser_dll.ParseSubnetworkChromosome
+_parse_subnetwork_chromosome.restype = C_SubnetworkChromosomeParseResult
+_parse_subnetwork_chromosome.argtypes = [
     ctypes.c_char_p 
 ]
 
-__free_subnetwork_parse_result = __network_parser_dll.FreeSubnetworkParseResult
-__free_subnetwork_parse_result.argtypes = [
+_free_subnetwork_parse_result = __network_parser_dll.FreeSubnetworkParseResult
+_free_subnetwork_parse_result.argtypes = [
     C_SubnetworkChromosomeParseResult
 ]
 logger.info("Prepared subnetwork chromosome library functions")
@@ -186,55 +203,45 @@ class QuadrantChromosomeParseResult:
 
     def __str__(self):
         return f"""QuadrantChromosomeParseResult:
-Return code: {self.return_code}
-Subnetworks per quadrant: {self.subnetworks_per_quadrant}
-Quadrant count: {self.quadrant_count}
-First quadrant slice: {self.quadrants[:1]}
-"""
+\tReturn code: {self.return_code}
+\tSubnetworks per quadrant: {self.subnetworks_per_quadrant}
+\tQuadrant count: {self.quadrant_count}
+\tFirst quadrant slice: {self.quadrants[:1]}"""
+    
+    @staticmethod
+    def from_file(path):
+        global _parse_quadrant_chromosome
+        global _free_quadrant_parse_result
+
+
+        logger.debug(f"Attempting to parse quadrant chromosome \"{path}\"")
+        c_result = _parse_quadrant_chromosome(bytes(path, "ASCII"))
+        result = QuadrantChromosomeParseResult(c_result, path=path)
+
+        logger.debug(f"Freeing C_QuadrantChromosomeParseResult for \"{path}\"")
+        _free_quadrant_parse_result(c_result)
+        logger.debug(f"Freed C_QuadrantChromosomeParseResult for \"{path}\"")
+
+        return result
 
 
 logger.info("Preparing quadrant chromosome library functions")
-__parse_quadrant_chromosome = __network_parser_dll.ParseQuadrantChromosome
-__parse_quadrant_chromosome.restype = C_QuadrantChromosomeParseResult
-__parse_quadrant_chromosome.argtypes = [
+_parse_quadrant_chromosome = __network_parser_dll.ParseQuadrantChromosome
+_parse_quadrant_chromosome.restype = C_QuadrantChromosomeParseResult
+_parse_quadrant_chromosome.argtypes = [
     ctypes.c_char_p
 ]
 
-__free_quadrant_parse_result = __network_parser_dll.FreeQuadrantParseResult
-__free_quadrant_parse_result.argtypes = [
+_free_quadrant_parse_result = __network_parser_dll.FreeQuadrantParseResult
+_free_quadrant_parse_result.argtypes = [
     C_QuadrantChromosomeParseResult
 ]
 logger.info("Prepared quadrant chromosome library functions")
 
 
 
-#TODO should these be staticmethods?
-#-----HELPER FUNCTIONS-----
-def parse_subnetwork_chromosome(path):
-    logger.debug(f"Attempting to parse subnetwork chromosome \"{path}\"")
-    c_result = __parse_subnetwork_chromosome(bytes(path, "ASCII"))
-    result = SubnetworkChromosomeParseResult(c_result, path=path)
-
-    logger.debug(f"Freeing C_SubnetworkChromosomeParseResult for \"{path}\"")
-    __free_subnetwork_parse_result(c_result)
-    logger.debug(f"Freed C_SubnetworkChromosomeParseResult for \"{path}\"")
-
-    return result
-
-def parse_quadrant_chromosome(path):
-    logger.debug(f"Attempting to parse quadrant chromosome \"{path}\"")
-    c_result = __parse_quadrant_chromosome(bytes(path, "ASCII"))
-    result = QuadrantChromosomeParseResult(c_result, path=path)
-
-    logger.debug(f"Freeing C_QuadrantChromosomeParseResult for \"{path}\"")
-    __free_quadrant_parse_result(c_result)
-    logger.debug(f"Freed C_QuadrantChromosomeParseResult for \"{path}\"")
-
-    return result
-
-
 if __name__ == "__main__":
-    FORMAT = '%(asctime)s %(message)s'
+    FORMAT = "%(levelname)s::%(asctime)s::%(name)s %(message)s"
     logging.basicConfig(filename="test_log.log", level=logging.DEBUG, format=FORMAT)
 
     #test subnetwork chromosome parsing
@@ -243,7 +250,7 @@ if __name__ == "__main__":
     test_files = ["Bad path.chr", "Short.chr", "Missing genes.chr", "Bad genes.chr", "Success.chr"]
     for file in test_files:
         print(file)
-        print(str(parse_subnetwork_chromosome(test_resource_dir + file)))
+        print(str(SubnetworkChromosomeParseResult.from_file(test_resource_dir + file)))
         print()
 
     print()
@@ -254,5 +261,5 @@ if __name__ == "__main__":
     test_files = ["Bad path.chr", "Short.chr", "Missing quadrants.chr", "Success.chr"]
     for file in test_files:
         print(file)
-        print(str(parse_quadrant_chromosome(test_resource_dir + file)))
+        print(str(QuadrantChromosomeParseResult.from_file(test_resource_dir + file)))
         print()
