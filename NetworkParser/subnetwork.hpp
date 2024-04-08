@@ -26,27 +26,27 @@ struct SubnetworkGene {
 };
 
 
-#define CHROMOSOME_SUCCESS			0
-#define CHROMOSOME_BAD_PATH			1
-#define CHROMOSOME_FILE_SHORT		2
-#define CHROMOSOME_MISSING_GENES	3
-#define CHROMOSOME_BAD_GENE			4
+#define SUBNETWORK_CHROMOSOME_SUCCESS			0
+#define SUBNETWORK_CHROMOSOME_BAD_PATH			1
+#define SUBNETWORK_CHROMOSOME_FILE_SHORT		2
+#define SUBNETWORK_CHROMOSOME_MISSING_GENES		3
+#define SUBNETWORK_CHROMOSOME_BAD_GENE			4
 
 struct SubnetworkChromosomeParseResult {
 	SubnetworkGene* Genes = nullptr;
 	uint32_t GeneCount = 0;
-	unsigned int ReturnCode = CHROMOSOME_SUCCESS;
+	unsigned int ReturnCode = SUBNETWORK_CHROMOSOME_SUCCESS;
 	signed   int AdditionalInfo = 0;
 };
 
 DLL_EXPORT SubnetworkChromosomeParseResult ParseSubnetworkChromosome(const char* Filepath);
-DLL_EXPORT void FreeParseResult(SubnetworkChromosomeParseResult Result);
+DLL_EXPORT void FreeSubnetworkParseResult(SubnetworkChromosomeParseResult Result);
 
 
-#define GENE_SUCCESS				0
-#define GENE_SHORT					1
-#define GENE_EOF					2
-#define GENE_MISSING_CONNECTIONS	3
+#define SUBNETWORK_GENE_SUCCESS					0
+#define SUBNETWORK_GENE_SHORT					1
+#define SUBNETWORK_GENE_EOF						2
+#define SUBNETWORK_GENE_MISSING_CONNECTIONS		3
 
 int ParseSubnetworkGene(std::ifstream& ChromosomeFile, SubnetworkGene* ResultLocation);
 int ParseInternalConnectionCodon(

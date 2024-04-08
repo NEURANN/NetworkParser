@@ -25,7 +25,7 @@ SubnetworkChromosomeParseResult ParseSubnetworkChromosome(const char* Filepath) 
 	chromosomeFile.open(Filepath, std::ifstream::in | std::ifstream::binary);
 	if (!chromosomeFile) {
 		chromosomeFile.close();
-		result.ReturnCode = CHROMOSOME_BAD_PATH;
+		result.ReturnCode = SUBNETWORK_CHROMOSOME_BAD_PATH;
 		result.AdditionalInfo = -1;
 		return result;
 	}
@@ -35,7 +35,7 @@ SubnetworkChromosomeParseResult ParseSubnetworkChromosome(const char* Filepath) 
 	chromosomeFile.read((char*)&result.GeneCount, 4);
 	if (chromosomeFile.gcount() != 4) {
 		chromosomeFile.close();
-		result.ReturnCode = CHROMOSOME_FILE_SHORT;
+		result.ReturnCode = SUBNETWORK_CHROMOSOME_FILE_SHORT;
 		result.AdditionalInfo = -1;
 		return result;
 	}
@@ -47,33 +47,33 @@ SubnetworkChromosomeParseResult ParseSubnetworkChromosome(const char* Filepath) 
 		int status = ParseSubnetworkGene(chromosomeFile, result.Genes + i);
 
 		switch (status) {
-		case GENE_SUCCESS:
+		case SUBNETWORK_GENE_SUCCESS:
 			continue;
 
-		case GENE_EOF:
+		case SUBNETWORK_GENE_EOF:
 			chromosomeFile.close();
 			CleanupGenes(result.Genes, result.GeneCount);
-			result.ReturnCode = CHROMOSOME_MISSING_GENES;
+			result.ReturnCode = SUBNETWORK_CHROMOSOME_MISSING_GENES;
 			result.AdditionalInfo = i;
 			return result;
 
-		case GENE_SHORT:
-		case GENE_MISSING_CONNECTIONS:
+		case SUBNETWORK_GENE_SHORT:
+		case SUBNETWORK_GENE_MISSING_CONNECTIONS:
 			chromosomeFile.close();
 			CleanupGenes(result.Genes, result.GeneCount);
-			result.ReturnCode = CHROMOSOME_BAD_GENE;
+			result.ReturnCode = SUBNETWORK_CHROMOSOME_BAD_GENE;
 			result.AdditionalInfo = i;
 			return result;
 		}
 	}
 
 	//successful chromosome parse
-	result.ReturnCode = CHROMOSOME_SUCCESS;
+	result.ReturnCode = SUBNETWORK_CHROMOSOME_SUCCESS;
 	result.AdditionalInfo = -1;
 	return result;
 }
 
-void FreeParseResult(SubnetworkChromosomeParseResult Result) {
+void FreeSubnetworkParseResult(SubnetworkChromosomeParseResult Result) {
 	//CleanupGenes(Result.Genes, Result.GeneCount);
 }
 
@@ -82,11 +82,11 @@ int ParseSubnetworkGene(std::ifstream& ChromosomeFile, SubnetworkGene* ResultLoc
 	//read in the gene parameters
 	ChromosomeFile.read((char*)&ResultLocation->GeneIndex, 8);
 	if (ChromosomeFile.gcount() != 8) {
-		return GENE_SHORT;
+		return SUBNETWORK_GENE_SHORT;
 	}
 	ChromosomeFile.read((char*)&ResultLocation->CodonCount, 4);
 	if (ChromosomeFile.gcount() != 4) {
-		return GENE_SHORT;
+		return SUBNETWORK_GENE_SHORT;
 	}
 
 	//iterate through each connection codon until the end of the subnetwork gene
@@ -95,17 +95,17 @@ int ParseSubnetworkGene(std::ifstream& ChromosomeFile, SubnetworkGene* ResultLoc
 	for (uint32_t i = 0; i < ResultLocation->CodonCount; i++) {
 		ChromosomeFile.peek();
 		if (ChromosomeFile.eof()) {
-			return GENE_EOF;
+			return SUBNETWORK_GENE_EOF;
 		}
 
 		int status = ParseInternalConnectionCodon(ChromosomeFile, 
 			ResultLocation->Codons + i);
 
-		if (status != GENE_SUCCESS) {
+		if (status != SUBNETWORK_GENE_SUCCESS) {
 			return status;
 		}
 	}
-	return GENE_SUCCESS;
+	return SUBNETWORK_GENE_SUCCESS;
 }
 
 int ParseInternalConnectionCodon(
@@ -115,24 +115,24 @@ int ParseInternalConnectionCodon(
 	//read in the codon parameters
 	ChromosomeFile.read((char*)&ResultLocation->CodonIndex, 4);
 	if (ChromosomeFile.gcount() != 4) {
-		return GENE_MISSING_CONNECTIONS;
+		return SUBNETWORK_GENE_MISSING_CONNECTIONS;
 	}
 	ChromosomeFile.read((char*)&ResultLocation->Source, 1);
 	if (ChromosomeFile.gcount() != 1) {
-		return GENE_MISSING_CONNECTIONS;
+		return SUBNETWORK_GENE_MISSING_CONNECTIONS;
 	}
 	ChromosomeFile.read((char*)&ResultLocation->Target, 1);
 	if (ChromosomeFile.gcount() != 1) {
-		return GENE_MISSING_CONNECTIONS;
+		return SUBNETWORK_GENE_MISSING_CONNECTIONS;
 	}
 	ChromosomeFile.read((char*)&ResultLocation->Types, 1);
 	if (ChromosomeFile.gcount() != 1) {
-		return GENE_MISSING_CONNECTIONS;
+		return SUBNETWORK_GENE_MISSING_CONNECTIONS;
 	}
 	ChromosomeFile.read((char*)&ResultLocation->Weight, 4);
 	if (ChromosomeFile.gcount() != 4) {
-		return GENE_MISSING_CONNECTIONS;
+		return SUBNETWORK_GENE_MISSING_CONNECTIONS;
 	}
 
-	return GENE_SUCCESS;
+	return SUBNETWORK_GENE_SUCCESS;
 }

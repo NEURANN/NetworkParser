@@ -30,6 +30,9 @@
     <ClInclude Include="NetworkParserLib\NetworkParser.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="quadrant.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -39,6 +42,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="subnetwork.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="quadrant.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
