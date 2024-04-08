@@ -196,7 +196,8 @@ class QuadrantChromosomeParseResult:
                 [c_result.SubnetworkIndices[i][j] for j in range(self.subnetworks_per_quadrant)] 
                 for i in range(self.quadrant_count)
             ]
-            logger.debug(f"Finished parsing subnetwork chromosome \"{path}\": {self.quadrant_count} quadrants found, {self.subnetworks_per_quadrant} subnetworks per quadrant")
+            logger.debug(f"Finished parsing quadrant chromosome \"{path}\": {self.quadrant_count} quadrants found, {self.subnetworks_per_quadrant} subnetworks per quadrant")
+        
         else:
             logger.error(f"Error parsing quadrant chromosome \"{path}\": {self.return_code}. {self.quadrant_count} quadrants found, {self.subnetworks_per_quadrant} subnetworks per quadrant")
 
@@ -240,6 +241,134 @@ logger.info("Prepared quadrant chromosome library functions")
 
 
 
+#-----CONNECTIONS CHROMOSOME-----
+class C_ConnectionGene(ctypes.Structure):
+    _fields_ = [
+        ("Weight", ctypes.c_float),
+        ("SourceSubnetworkIndex", ctypes.c_uint32),
+        ("SourceOutputIndex", ctypes.c_uint8),
+        ("TargetSubnetworkIndex", ctypes.c_uint32),
+        ("TargetInputIndex", ctypes.c_uint8)
+    ]
+
+class ConnectionGene:
+    def __init__(self, c_result):
+        self.weight = float(c_result.Weight)
+        self.source_subnetwork_index = int(c_result.SourceSubnetworkIndex)
+        self.source_output_index = int(c_result.SourceOutputIndex)
+        self.target_subnetwork_index = int(c_result.TargetSubnetworkIndex)
+        self.target_input_index = int(c_result.TargetInputIndex)
+        
+    def __str__(self):
+        return f"""ConnectionGene:
+\tWeight: {self.weight}
+\tSource: {self.source_subnetwork_index}.{self.source_output_index}
+\tTarget: {self.target_subnetwork_index}.{self.target_input_index}
+"""
+
+    def __repr__(self):
+        return f"{self.source_subnetwork_index}[{self.source_output_index}] -- {self.weight}--> {self.target_subnetwork_index}[{self.target_input_index}]"
+
+class C_QuadrantConnections(ctypes.Structure):
+    _fields_ = [
+        ("ConnectionGenes", ctypes.POINTER(C_ConnectionGene)),
+        ("ConnectionGeneCount", ctypes.c_uint32),
+        ("SourceQuadrantIndex", ctypes.c_uint32),
+        ("TargetQuadrantIndex", ctypes.c_uint32),
+    ]
+
+class QuadrantConnections:
+    def __init__(self, c_result):
+        self.connection_genes = []
+        self.connection_gene_count = int(c_result.ConnectionGeneCount)
+        self.source_quadrant_index = int(c_result.SourceQuadrantIndex)
+        self.target_quadrant_index = int(c_result.TargetQuadrantIndex)
+        self.connection_genes = [
+            ConnectionGene(c_cg) 
+            for c_cg in c_result.ConnectionGenes[:self.connection_gene_count]
+        ]
+
+    def __str__(self):
+        return f"""QuadrantConnections:
+\tSource quadrant: {self.source_quadrant_index}
+\tTarget quadrant: {self.target_quadrant_index}
+\tConnection gene count: {self.connection_gene_count}
+\tConnection genes slice: {self.connection_genes[:3]}
+"""
+    
+    def __repr__(self):
+        return f"{self.source_quadrant_index}->{self.target_quadrant_index}: {self.connection_gene_count}@{self.connection_genes[:3]}"
+
+class C_ConnectionsChromosomeParseResult(ctypes.Structure):
+    _fields_ = [
+        ("QuadrantConnectionsArray", ctypes.POINTER(C_QuadrantConnections)),
+        ("QuadrantConnectionsCount", ctypes.c_uint32),
+        ("ReturnCode", ctypes.c_uint),
+        ("AdditionalInfo", ctypes.c_int),
+    ]
+
+class ConnectionsChromosomeParseResult:
+    class Retcodes(Enum):
+        SUCCESS =           0
+        BAD_PATH =          1
+        SHORT =             2
+        QUADRANT_SHORT =    3
+
+    def __init__(self, c_result, path="No path provided"):
+        self.quadrant_connections_array = []
+        self.quadrant_connections_count = int(c_result.QuadrantConnectionsCount)
+        self.return_code = ConnectionsChromosomeParseResult.Retcodes(c_result.ReturnCode)
+        self.additional_info = int(c_result.AdditionalInfo)
+
+        if self.return_code == ConnectionsChromosomeParseResult.Retcodes.SUCCESS:
+            self.quadrant_connections_array = [
+                QuadrantConnections(c_cr)
+                for c_cr in c_result.QuadrantConnectionsArray[:self.quadrant_connections_count]
+            ]
+            logger.debug(f"Finished parsing connections chromosome \"{path}\": {self.quadrant_connections_count} Quadrant connections found")
+
+        else:
+            logger.error(f"Error parsing connections chromosome \"{path}\": {self.return_code}, Additional info = {self.additional_info}")
+
+    def __str__(self):
+        return f"""
+\tReturn code: {self.return_code}
+\tAdditional info: {self.additional_info}
+\tQuadrant connections count: {self.quadrant_connections_count}
+\tFirst quadrant connections slice: {self.quadrant_connections_array[:1]}
+"""
+
+    @staticmethod
+    def from_file(path):
+        global _parse_connections_chromosome
+        global _free_connections_parse_result
+
+
+        logger.debug(f"Attempting to parse connections chromosome \"{path}\"")
+        c_result = _parse_connections_chromosome(bytes(path, "ASCII"))
+        result = ConnectionsChromosomeParseResult(c_result, path=path)
+
+        logger.debug(f"Freeing C_ConnectionsChromosomeParseResult for \"{path}\"")
+        _free_connections_parse_result(c_result)
+        logger.debug(f"Freed C_ConnectionsChromosomeParseResult for \"{path}\"")
+
+        return result
+
+
+logger.info("Preparing quadrant chromosome library functions")
+_parse_connections_chromosome = __network_parser_dll.ParseConnectionsChromosome
+_parse_connections_chromosome.restype = C_ConnectionsChromosomeParseResult
+_parse_connections_chromosome.argtypes = [
+    ctypes.c_char_p
+]
+
+_free_connections_parse_result = __network_parser_dll.FreeConnectionsParseResult
+_free_connections_parse_result.argtypes = [
+    C_ConnectionsChromosomeParseResult
+]
+logger.info("Prepared quadrant chromosome library functions")
+
+
 if __name__ == "__main__":
     FORMAT = "%(levelname)s::%(asctime)s::%(name)s %(message)s"
     logging.basicConfig(filename="test_log.log", level=logging.DEBUG, format=FORMAT)
@@ -262,4 +391,14 @@ if __name__ == "__main__":
     for file in test_files:
         print(file)
         print(str(QuadrantChromosomeParseResult.from_file(test_resource_dir + file)))
+        print()
+
+
+    #test connections chromosome parsing
+    print("----- Testing connections parsing -----")
+    test_resource_dir = "Tests/connections/"
+    test_files = ["Bad path.chr", "Short.chr", "Quadrant short.chr", "Success.chr"]
+    for file in test_files:
+        print(file)
+        print(str(ConnectionsChromosomeParseResult.from_file(test_resource_dir + file)))
         print()

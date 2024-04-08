@@ -66,3 +66,37 @@ struct QuadrantChromosomeParseResult {
 
 DLL_IMPORT QuadrantChromosomeParseResult ParseQuadrantChromosome(const char* Filepath);
 DLL_IMPORT void FreeQuadrantParseResult(QuadrantChromosomeParseResult Result);
+
+
+
+/*-----CONNECTIONS CHROMOSOME-----*/
+#define CONNECTIONS_CHROMOSOME_SUCCESS				0
+#define CONNECTIONS_CHROMOSOME_BAD_PATH				1
+#define CONNECTIONS_CHROMOSOME_SHORT				2
+#define CONNECTIONS_CHROMOSOME_QUADRANT_SHORT		3
+
+
+struct ConnectionGene {
+	float Weight = 0.0f;
+	uint32_t SourceSubnetworkIndex = 0;
+	uint8_t SourceOutputIndex = 0;
+	uint32_t TargetSubnetworkIndex = 0;
+	uint8_t TargetInputIndex = 0;
+};
+
+struct QuadrantConnections {
+	ConnectionGene* ConnectionGenes = nullptr;
+	uint32_t ConnectionGeneCount = 0;
+	uint32_t SourceQuadrantIndex = 0;
+	uint32_t TargetQuadrantIndex = 0;
+};
+
+struct ConnectionsChromosomeParseResult {
+	QuadrantConnections* QuadrantConnectionsArray = nullptr;
+	uint32_t QuadrantConnectionsCount = 0;
+	unsigned int ReturnCode = CONNECTIONS_CHROMOSOME_SUCCESS;
+	signed   int AdditionalInfo = -1;
+};
+
+DLL_IMPORT ConnectionsChromosomeParseResult ParseConnectionsChromosome(const char* Filepath);
+DLL_IMPORT void FreeConnectionsParseResult(ConnectionsChromosomeParseResult Result);
