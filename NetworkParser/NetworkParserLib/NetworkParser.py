@@ -1,4 +1,6 @@
 import ctypes
+import pathlib
+
 from enum import Enum
 
 import logging
@@ -369,6 +371,49 @@ _free_connections_parse_result.argtypes = [
 logger.info("Prepared quadrant chromosome library functions")
 
 
+
+#helper class that stores all aspects of a network's genome
+class NetworkGenome:
+    class ChromosomeParseException(Exception):
+        pass
+
+    def __init__(self, path):
+        self.__parse_subnetworks(path)
+        self.__parse_quadrants(path)
+        self.__parse_connections(path)
+
+    def __parse_subnetworks(self, path):
+        subnetworks_path = pathlib.Path.joinpath(path, "subnetworks.chr")
+        subnetworks_result = SubnetworkChromosomeParseResult.from_file(subnetworks_path)
+
+        if subnetworks_result.return_code == SubnetworkChromosomeParseResult.Retcodes.SUCCESS:
+            self.subnetwork_genes = subnetworks_result.genes
+        else:
+            exception_message = f"{subnetworks_result.return_code}: Additional info = {subnetworks_result.additional_info}"
+            raise NetworkGenome.ChromosomeParseException(exception_message)
+        
+    def __parse_quadrants(self, path):
+        quadrants_path = pathlib.Path.joinpath(path, "quadrants.chr")
+        quadrants_result = QuadrantChromosomeParseResult.from_file(quadrants_path)
+
+        if quadrants_result.return_code == QuadrantChromosomeParseResult.Retcodes.SUCCESS:
+            self.quadrant_definitions = quadrants_result.quadrants
+            self.subnetworks_per_quadrant = quadrants_result.subnetworks_per_quadrant
+        else:
+            exception_message = f"{quadrants_result.return_code}"
+            raise NetworkGenome.ChromosomeParseException(exception_message)
+
+    def __parse_connections(self, path):
+        connections_path = pathlib.Path.joinpath(path, "connections.chr")
+        connections_result = ConnectionsChromosomeParseResult.from_file(connections_path)
+
+        if connections_result.return_code == ConnectionsChromosomeParseResult.Retcodes.SUCCESS:
+            self.quadrant_connections = connections_result.quadrant_connections_array
+        else:
+            exception_message = f"{connections_result.return_code}: Additional info = {connections_result.additional_info}"
+            raise NetworkGenome.ChromosomeParseException(exception_message)
+
+
 if __name__ == "__main__":
     FORMAT = "%(levelname)s::%(asctime)s::%(name)s %(message)s"
     logging.basicConfig(filename="test_log.log", level=logging.DEBUG, format=FORMAT)
@@ -402,6 +447,9 @@ if __name__ == "__main__":
         print(file)
         print(str(ConnectionsChromosomeParseResult.from_file(test_resource_dir + file)))
         print()
+
+
+    #TODO test network class
 
 
     print("Repeating operations to check for memory")
