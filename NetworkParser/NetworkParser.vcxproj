@@ -123,7 +123,8 @@
       </Command>
     </PreBuildEvent>
     <PostBuildEvent>
-      <Command>xcopy /y  "$(OutDir)*.dll" "$(ProjectDir)NetworkParserLib"</Command>
+      <Command>xcopy /y  "$(OutDir)*.dll" "$(SolutionDir)ReleaseTemplates\python\neurannparser"
+xcopy /y  "$(OutDir)*.dll" "$(SolutionDir)ReleaseTemplates\cpp"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -146,10 +147,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\ReleaseTemplates\cpp\NetworkParser.hpp" />
     <ClInclude Include="common.h" />
     <ClInclude Include="connections.hpp" />
     <ClInclude Include="framework.h" />
-    <ClInclude Include="NetworkParserLib\NetworkParser.hpp" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="quadrant.hpp" />
     <ClInclude Include="subnetwork.hpp" />
@@ -165,9 +166,6 @@
     </ClCompile>
     <ClCompile Include="quadrant.cpp" />
     <ClCompile Include="subnetwork.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="NetworkParserLib\NetworkParser.py" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

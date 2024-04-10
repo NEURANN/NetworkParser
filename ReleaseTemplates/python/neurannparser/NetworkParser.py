@@ -14,7 +14,9 @@ TARGET_TYPE_OUTPUT =  0b00001000
 
 #load the dll on import
 logger.info("Loading library file")
-__network_parser_dll = ctypes.cdll.LoadLibrary("./NetworkParser.dll")
+import os.path
+libpath = os.path.join(__file__, + "NetworkParser.dll")
+__network_parser_dll = ctypes.cdll.LoadLibrary(libpath)
 logger.info("Library file loaded.")
 
 
@@ -412,66 +414,3 @@ class NetworkGenome:
         else:
             exception_message = f"{connections_result.return_code}: Additional info = {connections_result.additional_info}"
             raise NetworkGenome.ChromosomeParseException(exception_message)
-
-
-if __name__ == "__main__":
-    FORMAT = "%(levelname)s::%(asctime)s::%(name)s %(message)s"
-    logging.basicConfig(filename="test_log.log", level=logging.DEBUG, format=FORMAT)
-
-    #test subnetwork chromosome parsing
-    print("----- Testing subnetwork parsing -----")
-    test_resource_dir = "Tests/subnetworks/"
-    test_files = ["Bad path.chr", "Short.chr", "Missing genes.chr", "Bad genes.chr", "Success.chr"]
-    for file in test_files:
-        print(file)
-        print(str(SubnetworkChromosomeParseResult.from_file(test_resource_dir + file)))
-        print()
-
-    print()
-
-    #test quadrant chromosome parsing
-    print("----- Testing quadrant parsing -----")
-    test_resource_dir = "Tests/quadrants/"
-    test_files = ["Bad path.chr", "Short.chr", "Missing quadrants.chr", "Success.chr"]
-    for file in test_files:
-        print(file)
-        print(str(QuadrantChromosomeParseResult.from_file(test_resource_dir + file)))
-        print()
-
-
-    #test connections chromosome parsing
-    print("----- Testing connections parsing -----")
-    test_resource_dir = "Tests/connections/"
-    test_files = ["Bad path.chr", "Short.chr", "Quadrant short.chr", "Success.chr"]
-    for file in test_files:
-        print(file)
-        print(str(ConnectionsChromosomeParseResult.from_file(test_resource_dir + file)))
-        print()
-
-
-    #TODO test network class
-
-
-    print("Repeating operations to check for memory")
-    print("Keep an eye on memory usage! This isn't a quantitative test!")
-    logger.disabled = True
-    PRINT_INTERVAL = 10000
-    TESTS = 5000000
-    for i in range(TESTS):
-        if i % PRINT_INTERVAL == 0:
-            print(i)
-
-        test_resource_dir = "Tests/subnetworks/"
-        test_files = ["Bad path.chr", "Short.chr", "Missing genes.chr", "Bad genes.chr", "Success.chr"]
-        for file in test_files:
-            SubnetworkChromosomeParseResult.from_file(test_resource_dir + file)
-
-        test_resource_dir = "Tests/quadrants/"
-        test_files = ["Bad path.chr", "Short.chr", "Missing quadrants.chr", "Success.chr"]
-        for file in test_files:
-            QuadrantChromosomeParseResult.from_file(test_resource_dir + file)
-
-        test_resource_dir = "Tests/connections/"
-        test_files = ["Bad path.chr", "Short.chr", "Quadrant short.chr", "Success.chr"]
-        for file in test_files:
-            ConnectionsChromosomeParseResult.from_file(test_resource_dir + file)

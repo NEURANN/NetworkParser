@@ -27,13 +27,13 @@
     <ClInclude Include="common.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="NetworkParserLib\NetworkParser.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="quadrant.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="connections.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ReleaseTemplates\cpp\NetworkParser.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -53,8 +53,5 @@
     <ClCompile Include="connections.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="NetworkParserLib\NetworkParser.py" />
   </ItemGroup>
 </Project>
