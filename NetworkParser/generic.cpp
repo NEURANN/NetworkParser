@@ -24,15 +24,15 @@ GenericChromosomeParseResult ParseGenericChromosome(const char* Filepath) {
 
 	//parse the chromosome based on the determined type
 	chromosomeFile.close();
-	if (strcmp(buf, "SUBN")) {
+	if (strcmp(buf, "SUBN") == 0) {
 		result.ParseResult.SCPR = ParseSubnetworkChromosome(Filepath);
 		result.ReturnCode = GENERIC_PARSE_SUBNETWORKS;
 	}
-	else if (strcmp(buf, "QUAD")) {
+	else if (strcmp(buf, "QUAD") == 0) {
 		result.ParseResult.QCPR = ParseQuadrantChromosome(Filepath);
 		result.ReturnCode = GENERIC_PARSE_QUADRANTS;
 	}
-	else if (strcmp(buf, "CONN")) {
+	else if (strcmp(buf, "CONN") == 0) {
 		result.ParseResult.CCPR = ParseConnectionsChromosome(Filepath);
 		result.ReturnCode = GENERIC_PARSE_CONNECTIONS;
 	}

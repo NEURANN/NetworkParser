@@ -22,7 +22,7 @@ ConnectionsChromosomeParseResult ParseConnectionsChromosome(const char* Filepath
 		result.ReturnCode = CONNECTIONS_CHROMOSOME_SHORT;
 		return result;
 	}
-	if (!strcmp(buf, "CONN")) {
+	if (strcmp(buf, "CONN") != 0) {
 		chromosomeFile.close();
 		result.ReturnCode = CONNECTIONS_CHROMOSOME_BAD_PATH;
 		return result;
