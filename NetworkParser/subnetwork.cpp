@@ -16,6 +16,20 @@ SubnetworkChromosomeParseResult ParseSubnetworkChromosome(const char* Filepath) 
 		return result;
 	}
 
+	//validate the chromosome is a subnetworks chromosome
+	char* buf = new char[4];
+	chromosomeFile.read(buf, 4);
+	if (chromosomeFile.gcount() != 4) {
+		chromosomeFile.close();
+		result.ReturnCode = SUBNETWORK_CHROMOSOME_FILE_SHORT;
+		return result;
+	}
+	if (!strcmp(buf, "SUBN")) {
+		chromosomeFile.close();
+		result.ReturnCode = SUBNETWORK_CHROMOSOME_BAD_PATH;
+		return result;
+	}
+
 	//stream successfully opened, first 4 bytes are the subnetwork gene count,
 	//i.e. how many times we try to read an individual gene
 	chromosomeFile.read((char*)&result.GeneCount, 4);

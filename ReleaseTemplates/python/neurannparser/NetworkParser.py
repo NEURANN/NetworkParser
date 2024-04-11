@@ -1,5 +1,6 @@
 import ctypes
 import pathlib
+import os.path
 
 from enum import Enum
 
@@ -14,7 +15,6 @@ TARGET_TYPE_OUTPUT =  0b00001000
 
 #load the dll on import
 logger.info("Loading library file")
-import os.path
 libpath = os.path.join(__file__, + "NetworkParser.dll")
 __network_parser_dll = ctypes.cdll.LoadLibrary(libpath)
 logger.info("Library file loaded.")
@@ -371,6 +371,81 @@ _free_connections_parse_result.argtypes = [
     C_ConnectionsChromosomeParseResult
 ]
 logger.info("Prepared quadrant chromosome library functions")
+
+
+
+#-----GENERIC CHROMOSOME-----
+class C_GenericParseResult(ctypes.Union):
+    _fields_ = [
+        ("SCPR", C_SubnetworkChromosomeParseResult),
+        ("QCPR", C_QuadrantChromosomeParseResult),
+        ("CCPR", C_ConnectionsChromosomeParseResult)
+    ]
+
+class C_GenericChromosomeParseResult(ctypes.Structure):
+    _fields_ = [
+        ("ReturnCode", ctypes.c_uint32),
+        ("ParseResult", C_GenericParseResult)
+    ]
+
+class GenericChromosomeParseResult:
+    class Retcodes(Enum):
+        SUBNETWORKS =     0
+        QUADRANTS =       1
+        CONNECTIONS =     2
+        BAD_PATH =        3
+        UNRECOGNISED =    4
+        SHORT =           5   
+
+    def __init__(self, c_result, path="No path provided"):
+        self.return_code = GenericChromosomeParseResult.Retcodes(c_result.ReturnCode)
+        self.parse_result = None
+
+        if self.return_code == GenericChromosomeParseResult.Retcodes.SUBNETWORKS:
+            self.parse_result = SubnetworkChromosomeParseResult(c_result.ParseResult.SCPR)
+            logger.debug(f"Finished parsing generic chromosome as subnetworks chromosome \"{path}\"")
+        elif self.return_code == GenericChromosomeParseResult.Retcodes.QUADRANTS:
+            self.parse_result = QuadrantChromosomeParseResult(c_result.ParseResult.QCPR)
+            logger.debug(f"Finished parsing generic chromosome as quadrants chromosome \"{path}\"")
+        elif self.return_code == GenericChromosomeParseResult.Retcodes.CONNECTIONS:
+            self.parse_result = ConnectionsChromosomeParseResult(c_result.ParseResult.CCPR)
+            logger.debug(f"Finished parsing generic chromosome as connections chromosome \"{path}\"")
+        else:
+            logger.error(f"Error parsing generic chromosome \"{path}\": {self.return_code}")
+
+
+    @staticmethod
+    def from_file(self, path):
+        global _parse_generic_chromosome
+        global _free_subnetwork_parse_result
+        global _free_quadrant_parse_result
+        global _free_connections_parse_result
+
+        logger.debug(f"Attempting to parse generic chromosome \"{path}\"")
+        c_result = _parse_generic_chromosome(path)
+        result = GenericChromosomeParseResult(c_result, path=path)
+
+        #freeing the result depends on the result type
+        if result.return_code == GenericChromosomeParseResult.Retcodes.SUBNETWORKS:
+            _free_subnetwork_parse_result(c_result.ParseResult)
+        elif result.return_code == GenericChromosomeParseResult.Retcodes.QUADRANTS:
+            _free_quadrant_parse_result(c_result.ParseResult)
+        elif self.return_code == GenericChromosomeParseResult.Retcodes.CONNECTIONS:
+            _free_connections_parse_result(c_result.ParseResult)
+
+        #if the result didn't end up in anything relevant, don't free it.
+        #there weren't any allocations made that GC won't catch.
+
+        return result
+
+
+logger.info("Preparing generic chromosome library functions")
+_parse_generic_chromosome = __network_parser_dll.ParseGenericChromosome
+_parse_generic_chromosome.restype = C_GenericChromosomeParseResult
+_parse_generic_chromosome.argtypes = [
+    ctypes.c_char_p
+]
+logger.info("Prepared generic chromosome library functions")
 
 
 

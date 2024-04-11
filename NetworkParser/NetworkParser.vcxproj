@@ -151,6 +151,7 @@ xcopy /y  "$(OutDir)*.dll" "$(SolutionDir)ReleaseTemplates\cpp"</Command>
     <ClInclude Include="common.h" />
     <ClInclude Include="connections.hpp" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="generic.hpp" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="quadrant.hpp" />
     <ClInclude Include="subnetwork.hpp" />
@@ -158,6 +159,7 @@ xcopy /y  "$(OutDir)*.dll" "$(SolutionDir)ReleaseTemplates\cpp"</Command>
   <ItemGroup>
     <ClCompile Include="connections.cpp" />
     <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="generic.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

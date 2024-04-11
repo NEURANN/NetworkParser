@@ -14,6 +14,20 @@ QuadrantChromosomeParseResult ParseQuadrantChromosome(const char* Filepath) {
 		return result;
 	}
 
+	//validate the chromosome is a quadrants chromosome
+	char* buf = new char[4];
+	chromosomeFile.read(buf, 4);
+	if (chromosomeFile.gcount() != 4) {
+		chromosomeFile.close();
+		result.ReturnCode = QUADRANT_CHROMOSOME_FILE_SHORT;
+		return result;
+	}
+	if (!strcmp(buf, "QUAD")) {
+		chromosomeFile.close();
+		result.ReturnCode = QUADRANT_CHROMOSOME_BAD_PATH;
+		return result;
+	}
+
 	//stream successfully opened, first 4 bytes are the quadrant count
 	chromosomeFile.read((char*)&result.QuadrantCount, 4);
 	if (chromosomeFile.gcount() != 4) {

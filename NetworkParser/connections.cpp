@@ -14,6 +14,20 @@ ConnectionsChromosomeParseResult ParseConnectionsChromosome(const char* Filepath
 		return result;
 	}
 
+	//validate the chromosome is a connections chromosome
+	char* buf = new char[4];
+	chromosomeFile.read(buf, 4);
+	if (chromosomeFile.gcount() != 4) {
+		chromosomeFile.close();
+		result.ReturnCode = CONNECTIONS_CHROMOSOME_SHORT;
+		return result;
+	}
+	if (!strcmp(buf, "CONN")) {
+		chromosomeFile.close();
+		result.ReturnCode = CONNECTIONS_CHROMOSOME_BAD_PATH;
+		return result;
+	}
+
 	//stream successfully opened, first 4 bytes are the quadrant connections count
 	chromosomeFile.read((char*)&result.QuadrantConnectionsCount, 4);
 	if (chromosomeFile.gcount() != 4) {
