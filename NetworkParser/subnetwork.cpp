@@ -24,7 +24,7 @@ SubnetworkChromosomeParseResult ParseSubnetworkChromosome(const char* Filepath) 
 		result.ReturnCode = SUBNETWORK_CHROMOSOME_FILE_SHORT;
 		return result;
 	}
-	if (strcmp(buf, "SUBN") != 0) {
+	if (strncmp(buf, "SUBN", 4) != 0) {
 		chromosomeFile.close();
 		result.ReturnCode = SUBNETWORK_CHROMOSOME_BAD_PATH;
 		return result;

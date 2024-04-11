@@ -22,7 +22,7 @@ QuadrantChromosomeParseResult ParseQuadrantChromosome(const char* Filepath) {
 		result.ReturnCode = QUADRANT_CHROMOSOME_FILE_SHORT;
 		return result;
 	}
-	if (strcmp(buf, "QUAD") != 0) {
+	if (strncmp(buf, "QUAD", 4) != 0) {
 		chromosomeFile.close();
 		result.ReturnCode = QUADRANT_CHROMOSOME_BAD_PATH;
 		return result;
