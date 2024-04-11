@@ -1,5 +1,6 @@
-from NetworkParser import \
+from .networkparser import \
     SubnetworkChromosomeParseResult, \
     QuadrantChromosomeParseResult, \
     ConnectionsChromosomeParseResult, \
+    GenericChromosomeParseResult, \
     NetworkGenome

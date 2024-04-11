@@ -15,7 +15,7 @@ TARGET_TYPE_OUTPUT =  0b00001000
 
 #load the dll on import
 logger.info("Loading library file")
-libpath = os.path.join(__file__, + "NetworkParser.dll")
+libpath = os.path.join(os.path.dirname(os.path.realpath(__file__)), "NetworkParser.dll")
 __network_parser_dll = ctypes.cdll.LoadLibrary(libpath)
 logger.info("Library file loaded.")
 
@@ -415,23 +415,23 @@ class GenericChromosomeParseResult:
 
 
     @staticmethod
-    def from_file(self, path):
+    def from_file(path):
         global _parse_generic_chromosome
         global _free_subnetwork_parse_result
         global _free_quadrant_parse_result
         global _free_connections_parse_result
 
         logger.debug(f"Attempting to parse generic chromosome \"{path}\"")
-        c_result = _parse_generic_chromosome(path)
+        c_result = _parse_generic_chromosome(bytes(path, "ASCII"))
         result = GenericChromosomeParseResult(c_result, path=path)
 
         #freeing the result depends on the result type
         if result.return_code == GenericChromosomeParseResult.Retcodes.SUBNETWORKS:
-            _free_subnetwork_parse_result(c_result.ParseResult)
+            _free_subnetwork_parse_result(c_result.ParseResult.SCPR)
         elif result.return_code == GenericChromosomeParseResult.Retcodes.QUADRANTS:
-            _free_quadrant_parse_result(c_result.ParseResult)
-        elif self.return_code == GenericChromosomeParseResult.Retcodes.CONNECTIONS:
-            _free_connections_parse_result(c_result.ParseResult)
+            _free_quadrant_parse_result(c_result.ParseResult.QCPR)
+        elif result.return_code == GenericChromosomeParseResult.Retcodes.CONNECTIONS:
+            _free_connections_parse_result(c_result.ParseResult.CCPR)
 
         #if the result didn't end up in anything relevant, don't free it.
         #there weren't any allocations made that GC won't catch.

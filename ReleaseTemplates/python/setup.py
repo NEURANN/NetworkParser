@@ -7,7 +7,7 @@ class BinaryDistribution(Distribution):
     
 setup(
     name='neurannparser',
-    version='0.0.1',    
+    version='0.0.2',    
     description='Parser for NEURANN Chromosomes and Networks',
     url='https://github.com/NEURANN/NetworkParser',
     author='AyOhEe',
