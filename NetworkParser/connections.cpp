@@ -63,10 +63,12 @@ void FreeConnectionsParseResult(ConnectionsChromosomeParseResult Result) {
 	for (uint32_t i = 0; i < Result.QuadrantConnectionsCount; i++) {
 		if (Result.QuadrantConnectionsArray[i].ConnectionGenes != nullptr) {
 			delete Result.QuadrantConnectionsArray[i].ConnectionGenes;
+			Result.QuadrantConnectionsArray[i].ConnectionGenes = nullptr;
 		}
 	}
 
 	delete Result.QuadrantConnectionsArray;
+	Result.QuadrantConnectionsArray = nullptr;
 }
 
 

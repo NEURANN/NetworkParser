@@ -79,8 +79,10 @@ void FreeSubnetworkParseResult(SubnetworkChromosomeParseResult Result) {
 
 	for (uint32_t i = 0; i < Result.GeneCount; i++) {
 		delete Result.Genes[i].Codons;
+		Result.Genes[i].Codons = nullptr;
 	}
 	delete Result.Genes;
+	Result.Genes = nullptr;
 }
 
 

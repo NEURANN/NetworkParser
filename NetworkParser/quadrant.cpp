@@ -78,5 +78,7 @@ void FreeQuadrantParseResult(QuadrantChromosomeParseResult Result) {
 	//the subnetwork indices 2D array was initially allocated as a 1D array.
 	//therefore, only the first pointer to an array, and the array itself, must be freed.
 	delete Result.SubnetworkIndices[0];
+	Result.SubnetworkIndices[0] = nullptr;
 	delete Result.SubnetworkIndices;
+	Result.SubnetworkIndices = nullptr;
 }
